@@ -1,6 +1,6 @@
 resource_groups = {
   "rg1" = {
-    name     = "aug-rg"
+    name     = "vikas-rg"
     location = "East US"
   }
 }
@@ -8,7 +8,7 @@ resource_groups = {
 virtual_network = {
   "vnet1" = {
     name                = "aug-vnet"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
     address_space       = ["10.0.0.0/16"]
   }
@@ -17,25 +17,25 @@ virtual_network = {
 subnet = {
   "snet1" = {
     name                 = "frontend-subnet"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     virtual_network_name = "aug-vnet"
     address_prefixes     = ["10.0.1.0/24"]
   }
   "snet2" = {
     name                 = "backend-subnet"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     virtual_network_name = "aug-vnet"
     address_prefixes     = ["10.0.2.0/24"]
   }
   "snet3" = {
     name                 = "database-subnet"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     virtual_network_name = "aug-vnet"
     address_prefixes     = ["10.0.3.0/24"]
   }
   "snet4" = {
     name                 = "AzureBastionSubnet"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     virtual_network_name = "aug-vnet"
     address_prefixes     = ["10.0.4.0/24"]
   }
@@ -44,7 +44,7 @@ subnet = {
 network_security_group = {
   "nsg1" = {
     name                = "aug-nsg"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
   }
 }
@@ -52,7 +52,7 @@ network_interface = {
   "nic1" = {
     name                 = "frontend-nic"
     location             = "East US"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     subnet_name          = "frontend-subnet"
     virtual_network_name = "aug-vnet"
 
@@ -60,7 +60,7 @@ network_interface = {
   "nic2" = {
     name                 = "backend-nic"
     location             = "East US"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     subnet_name          = "backend-subnet"
     virtual_network_name = "aug-vnet"
 
@@ -68,7 +68,7 @@ network_interface = {
   "nic3" = {
     name                 = "database-nic"
     location             = "East US"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     subnet_name          = "database-subnet"
     virtual_network_name = "aug-vnet"
 
@@ -78,7 +78,7 @@ network_interface = {
 bastion = {
   "bastion1" = {
     name                 = "aug-bastion"
-    resource_group_name  = "aug-rg"
+    resource_group_name  = "vikas-rg"
     location             = "East US"
     virtual_network_name = "aug-vnet"
     subnet_name          = "AzureBastionSubnet"
@@ -88,7 +88,7 @@ bastion = {
 key_vault = {
   "kv1" = {
     name                = "aug-kv"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
     sku_name            = "standard"
   }
@@ -97,7 +97,7 @@ key_vault = {
 virtual_machine = {
   vm1 = {
     name                = "frontend-vm"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
     size                = "Standard_B1s"
     admin_username      = "adminuser"
@@ -117,7 +117,7 @@ virtual_machine = {
   }
   vm2 = {
     name                = "backend-vm"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
     size                = "Standard_B1s"
     admin_username      = "adminuser"
@@ -137,7 +137,7 @@ virtual_machine = {
   }
   vm3 = {
     name                = "database-vm"
-    resource_group_name = "aug-rg"
+    resource_group_name = "vikas-rg"
     location            = "East US"
     size                = "Standard_B1s"
     admin_username      = "adminuser"
