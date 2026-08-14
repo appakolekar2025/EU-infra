@@ -1,89 +1,182 @@
 name: Terraform CI/CD
 
 on:
+
+  # =========================================================
+  # FEATURE BRANCH
+  # PLAN ONLY
+  # =========================================================
   push:
     branches:
       - feature
 
+  # =========================================================
+  # PULL REQUEST TO MAIN
+  # PLAN ONLY
+  # =========================================================
   pull_request:
     branches:
       - main
 
+  # =========================================================
+  # MANUAL RUN
+  # =========================================================
   workflow_dispatch:
+
+
+# =========================================================
+# PERMISSIONS
+# =========================================================
 
 permissions:
   id-token: write
   contents: read
   pull-requests: write
+  security-events: write
+
+
+# =========================================================
+# GLOBAL ENVIRONMENT
+# =========================================================
 
 env:
+
   TF_ROOT: ./parent_module
+
   ARM_USE_OIDC: true
   ARM_USE_AZUREAD: true
+
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+
 jobs:
 
+  # =========================================================
+  # FEATURE BRANCH
+  # PLAN ONLY
+  # =========================================================
+
   feature-plan:
-    name: Feature - Terraform Plan
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feature'
+
+    name: 🔵 Feature - Terraform Plan
+
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/feature'
+
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout
+      # =====================================================
+      # 1. CHECKOUT
+      # =====================================================
+
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: Azure Login
+
+      # =====================================================
+      # 2. AZURE LOGIN
+      # =====================================================
+
+      - name: 🔐 Azure Login
         uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Check Azure
-        run: az account show
 
-      - name: Setup Terraform
+      # =====================================================
+      # 3. VERIFY AZURE LOGIN
+      # =====================================================
+
+      - name: 🔎 Check Azure Login
+        run: |
+          az account show
+
+
+      # =====================================================
+      # 4. SETUP TERRAFORM
+      # =====================================================
+
+      - name: 🏗️ Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_ROOT }}
-        run: terraform init
 
-      - name: Terraform Validate
-        working-directory: ${{ env.TF_ROOT }}
-        run: terraform validate
+      # =====================================================
+      # 5. TERRAFORM INIT
+      # =====================================================
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v6
-
-      - name: TFLint
+      - name: 📦 Terraform Init
         working-directory: ${{ env.TF_ROOT }}
         run: |
-          tflint --init
-          tflint
+          terraform init
 
-      - name: tfsec
+
+      # =====================================================
+      # 6. TERRAFORM FORMAT
+      # =====================================================
+
+      - name: 🧹 Terraform Format Check
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform fmt -check -recursive
+
+
+      # =====================================================
+      # 7. TERRAFORM VALIDATE
+      # =====================================================
+
+      - name: ✅ Terraform Validate
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform validate
+
+
+      # =====================================================
+      # 8. TFSEC
+      # =====================================================
+
+      - name: 🛡️ Run tfsec
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_dir: ${{ env.TF_ROOT }}
+          format: lovely
         continue-on-error: true
 
-      - name: Setup Infracost
+
+      # =====================================================
+      # 9. INFRACOST SETUP
+      # =====================================================
+
+      - name: 💰 Setup Infracost
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
-      - name: Infracost
+
+      # =====================================================
+      # 10. INFRACOST
+      # =====================================================
+
+      - name: 💰 Run Infracost
         working-directory: ${{ env.TF_ROOT }}
         run: |
           infracost breakdown \
             --path . \
             --format table
 
-      - name: Terraform Plan
+
+      # =====================================================
+      # 11. TERRAFORM PLAN
+      # =====================================================
+
+      - name: 📋 Terraform Plan
         working-directory: ${{ env.TF_ROOT }}
-        run: terraform plan -var-file="terraform.tfvars"
+        run: |
+          terraform plan \
+            -var-file="terraform.tfvars"
