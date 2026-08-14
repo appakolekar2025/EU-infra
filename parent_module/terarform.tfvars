@@ -3,6 +3,10 @@ resource_groups = {
     name     = "dilip-rg"
     location = "East US"
   }
+    "rg2" = {
+    name     = "vikas-rg"
+    location = "East US"
+  }
 }
 
 virtual_network = {
