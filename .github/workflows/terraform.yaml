@@ -139,7 +139,7 @@ jobs:
 
 
       # =====================================================
-      # 7. TFSEC
+      # 7. TFSEC SECURITY SCAN
       # =====================================================
 
       - name: 🛡️ Run tfsec
@@ -151,32 +151,7 @@ jobs:
 
 
       # =====================================================
-      # 8. INFRACOST SETUP
-      # =====================================================
-
-      - name: 💰 Setup Infracost
-        uses: infracost/actions/setup@v3
-        with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
-
-
-      # =====================================================
-      # 9. INFRACOST
-      # =====================================================
-
-      - name: 💰 Run Infracost
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          infracost breakdown \
-            --path . \
-            --format table \
-            > infracost-report.txt
-
-          cat infracost-report.txt
-
-
-      # =====================================================
-      # 10. TERRAFORM PLAN
+      # 8. TERRAFORM PLAN
       # =====================================================
 
       - name: 📋 Terraform Plan
@@ -184,21 +159,6 @@ jobs:
         run: |
           terraform plan \
             -var-file="terraform.tfvars"
-
-
-      # =====================================================
-      # 11. UPLOAD INFRACOST REPORT
-      # =====================================================
-
-      - name: 📤 Upload Infracost Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: feature-infracost-report
-          path: ${{ env.TF_ROOT }}/infracost-report.txt
-          if-no-files-found: warn
-          retention-days: 30
-
 
 
   # =========================================================
@@ -275,7 +235,7 @@ jobs:
 
 
       # =====================================================
-      # 7. TFSEC
+      # 7. TFSEC SECURITY SCAN
       # =====================================================
 
       - name: 🛡️ Run tfsec
@@ -287,32 +247,7 @@ jobs:
 
 
       # =====================================================
-      # 8. INFRACOST SETUP
-      # =====================================================
-
-      - name: 💰 Setup Infracost
-        uses: infracost/actions/setup@v3
-        with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
-
-
-      # =====================================================
-      # 9. INFRACOST
-      # =====================================================
-
-      - name: 💰 Run Infracost
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          infracost breakdown \
-            --path . \
-            --format table \
-            > infracost-report.txt
-
-          cat infracost-report.txt
-
-
-      # =====================================================
-      # 10. TERRAFORM PLAN
+      # 8. TERRAFORM PLAN
       # =====================================================
 
       - name: 📋 Terraform Plan
@@ -322,26 +257,11 @@ jobs:
             -var-file="terraform.tfvars"
 
 
-      # =====================================================
-      # 11. UPLOAD INFRACOST REPORT
-      # =====================================================
-
-      - name: 📤 Upload Infracost Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-infracost-report
-          path: ${{ env.TF_ROOT }}/infracost-report.txt
-          if-no-files-found: warn
-          retention-days: 30
-
-
-
   # =========================================================
   # MAIN BRANCH
   # PLAN
   #
-  # This runs when PR is merged into main.
+  # Runs after changes are merged/pushed to main.
   # =========================================================
 
   main-plan:
@@ -414,7 +334,7 @@ jobs:
 
 
       # =====================================================
-      # 7. TFSEC
+      # 7. TFSEC SECURITY SCAN
       # =====================================================
 
       - name: 🛡️ Run tfsec
@@ -426,32 +346,7 @@ jobs:
 
 
       # =====================================================
-      # 8. INFRACOST SETUP
-      # =====================================================
-
-      - name: 💰 Setup Infracost
-        uses: infracost/actions/setup@v3
-        with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
-
-
-      # =====================================================
-      # 9. INFRACOST
-      # =====================================================
-
-      - name: 💰 Run Infracost
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          infracost breakdown \
-            --path . \
-            --format table \
-            > infracost-report.txt
-
-          cat infracost-report.txt
-
-
-      # =====================================================
-      # 10. TERRAFORM PLAN
+      # 8. TERRAFORM PLAN
       # =====================================================
 
       - name: 📋 Terraform Plan
@@ -463,7 +358,7 @@ jobs:
 
 
       # =====================================================
-      # 11. UPLOAD TERRAFORM PLAN
+      # 9. UPLOAD TERRAFORM PLAN
       # =====================================================
 
       - name: 📤 Upload Terraform Plan
@@ -472,21 +367,6 @@ jobs:
           name: terraform-plan
           path: ${{ env.TF_ROOT }}/tfplan
           retention-days: 1
-
-
-      # =====================================================
-      # 12. UPLOAD INFRACOST REPORT
-      # =====================================================
-
-      - name: 📤 Upload Infracost Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: main-infracost-report
-          path: ${{ env.TF_ROOT }}/infracost-report.txt
-          if-no-files-found: warn
-          retention-days: 30
-
 
 
   # =========================================================
@@ -568,7 +448,7 @@ jobs:
 
 
       # =====================================================
-      # 6. DOWNLOAD EXACT PLAN
+      # 6. DOWNLOAD PLAN
       # =====================================================
 
       - name: 📥 Download Terraform Plan
