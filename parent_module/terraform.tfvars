@@ -83,7 +83,7 @@ network_interface = {
 }
 
 bastion = {
-  "bastion1" = {
+  bastion1 = {
     name                 = "aug-bastion"
     resource_group_name  = "appa-rg"
     location             = "East US"
