@@ -7,6 +7,11 @@ resource_groups = {
     name     = "vikas-rg"
     location = "East US"
   }
+  rg3 = {
+    name     = "Gaurav-rg"
+    location = "East US"
+  }
+
 }
 
 # subnet = {
