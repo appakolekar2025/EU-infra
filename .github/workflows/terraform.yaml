@@ -1,470 +1,105 @@
-name: Terraform CI/CD
+name: Terraform
 
 on:
-
-  # =========================================================
-  # FEATURE BRANCH
-  # PLAN ONLY
-  # =========================================================
   push:
     branches:
-      - feature
+      - "**"
 
-  # =========================================================
-  # PULL REQUEST TO MAIN
-  # PLAN ONLY
-  # =========================================================
   pull_request:
     branches:
       - main
-    types:
-      - opened
-      - synchronize
-      - reopened
-
-  # =========================================================
-  # MANUAL RUN
-  # =========================================================
-  workflow_dispatch:
-
-
-# =========================================================
-# PERMISSIONS
-# =========================================================
 
 permissions:
-  id-token: write
   contents: read
-  pull-requests: write
-  security-events: write
-
-
-# =========================================================
-# GLOBAL ENVIRONMENT
-# =========================================================
-
-env:
-
-  # Terraform root folder
-  TF_ROOT: ./parent_module
-
-  # Azure OIDC
-  ARM_USE_OIDC: true
-  ARM_USE_AZUREAD: true
-
-  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-
-# =========================================================
-# JOBS
-# =========================================================
 
 jobs:
-
-
-  # =========================================================
-  # FEATURE BRANCH
-  # PLAN ONLY
-  # =========================================================
-
-  feature-plan:
-
-    name: 🔵 Feature - Terraform Plan
-
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/feature'
-
+  terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: parent_module
+
     steps:
-
-      # =====================================================
-      # 1. CHECKOUT
-      # =====================================================
-
-      - name: 📥 Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-
-      # =====================================================
-      # 2. AZURE LOGIN
-      # =====================================================
-
-      - name: 🔐 Azure Login
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-
-      # =====================================================
-      # 3. VERIFY AZURE LOGIN
-      # =====================================================
-
-      - name: 🔎 Check Azure Login
-        run: |
-          az account show
-
-
-      # =====================================================
-      # 4. SETUP TERRAFORM
-      # =====================================================
-
-      - name: 🏗️ Setup Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-
-      # =====================================================
-      # 5. TERRAFORM INIT
-      # =====================================================
-
-      - name: 📦 Terraform Init
-        working-directory: ${{ env.TF_ROOT }}
+      - name: Azure Login
         run: |
-          terraform init
+          az login \
+            --service-principal \
+            --username "341b1f51-173e-43f9-a204-d6846c6a92bd" \
+            --password "9fP8Q~EfSajcXzS6fmjLLWr7nnIyHAMOsxSW.a.2" \
+            --tenant "8dd47890-014e-4d4a-9706-c08392fd00d0"
 
-
-      # =====================================================
-      # 6. TERRAFORM VALIDATE
-      # =====================================================
-
-      - name: ✅ Terraform Validate
-        working-directory: ${{ env.TF_ROOT }}
+      - name: Set Azure Subscription
         run: |
-          terraform validate
+          az account set \
+            --subscription "d4fb712a-aae3-49cf-8c1b-9ed8f8b11a56"
 
+      - name: Check Azure Login
+        run: az account show
 
-      # =====================================================
-      # 7. TFSEC SECURITY SCAN
-      # =====================================================
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
 
-      - name: 🛡️ Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_dir: ${{ env.TF_ROOT }}
-          format: lovely
-        continue-on-error: true
+      - name: Terraform Init
+        run: terraform init
 
+      - name: Terraform Validate
+        run: terraform validate
 
-      # =====================================================
-      # 8. TERRAFORM PLAN
-      # =====================================================
+      - name: Terraform Plan
+        run: terraform plan
 
-      - name: 📋 Terraform Plan
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform plan \
-            -var-file="terraform.tfvars"
-
-
-  # =========================================================
-  # PULL REQUEST
-  # PLAN ONLY
-  # =========================================================
-
-  pull-request-plan:
-
-    name: 🟡 PR - Terraform Plan
-
-    if: |
-      github.event_name == 'pull_request'
-
+  terraform-apply:
+    name: Terraform Apply
     runs-on: ubuntu-latest
 
-    steps:
+    needs: terraform-plan
 
-      # =====================================================
-      # 1. CHECKOUT
-      # =====================================================
+    # Apply ONLY after push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-
-      # =====================================================
-      # 2. AZURE LOGIN
-      # =====================================================
-
-      - name: 🔐 Azure Login
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-
-      # =====================================================
-      # 3. VERIFY AZURE LOGIN
-      # =====================================================
-
-      - name: 🔎 Check Azure Login
-        run: |
-          az account show
-
-
-      # =====================================================
-      # 4. SETUP TERRAFORM
-      # =====================================================
-
-      - name: 🏗️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-
-      # =====================================================
-      # 5. TERRAFORM INIT
-      # =====================================================
-
-      - name: 📦 Terraform Init
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform init
-
-
-      # =====================================================
-      # 6. TERRAFORM VALIDATE
-      # =====================================================
-
-      - name: ✅ Terraform Validate
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform validate
-
-
-      # =====================================================
-      # 7. TFSEC SECURITY SCAN
-      # =====================================================
-
-      - name: 🛡️ Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_dir: ${{ env.TF_ROOT }}
-          format: lovely
-        continue-on-error: true
-
-
-      # =====================================================
-      # 8. TERRAFORM PLAN
-      # =====================================================
-
-      - name: 📋 Terraform Plan
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform plan \
-            -var-file="terraform.tfvars"
-
-
-  # =========================================================
-  # MAIN BRANCH
-  # PLAN
-  #
-  # Runs after changes are merged/pushed to main.
-  # =========================================================
-
-  main-plan:
-
-    name: 🟢 Main - Terraform Plan
-
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
-
-    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: parent_module
 
     steps:
-
-      # =====================================================
-      # 1. CHECKOUT
-      # =====================================================
-
-      - name: 📥 Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-
-      # =====================================================
-      # 2. AZURE LOGIN
-      # =====================================================
-
-      - name: 🔐 Azure Login
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-
-      # =====================================================
-      # 3. VERIFY AZURE LOGIN
-      # =====================================================
-
-      - name: 🔎 Check Azure Login
-        run: |
-          az account show
-
-
-      # =====================================================
-      # 4. SETUP TERRAFORM
-      # =====================================================
-
-      - name: 🏗️ Setup Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-
-      # =====================================================
-      # 5. TERRAFORM INIT
-      # =====================================================
-
-      - name: 📦 Terraform Init
-        working-directory: ${{ env.TF_ROOT }}
+      - name: Azure Login
         run: |
-          terraform init
+          az login \
+            --service-principal \
+            --username "341b1f51-173e-43f9-a204-d6846c6a92bd" \
+            --password "9fP8Q~EfSajcXzS6fmjLLWr7nnIyHAMOsxSW.a.2" \
+            --tenant "8dd47890-014e-4d4a-9706-c08392fd00d0"
 
-
-      # =====================================================
-      # 6. TERRAFORM VALIDATE
-      # =====================================================
-
-      - name: ✅ Terraform Validate
-        working-directory: ${{ env.TF_ROOT }}
+      - name: Set Azure Subscription
         run: |
-          terraform validate
+          az account set \
+            --subscription "d4fb712a-aae3-49cf-8c1b-9ed8f8b11a56"
 
+      - name: Check Azure Login
+        run: az account show
 
-      # =====================================================
-      # 7. TFSEC SECURITY SCAN
-      # =====================================================
+      - name: Terraform Init
+        run: terraform init
 
-      - name: 🛡️ Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working_dir: ${{ env.TF_ROOT }}
-          format: lovely
-        continue-on-error: true
+      - name: Terraform Validate
+        run: terraform validate
 
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      # =====================================================
-      # 8. TERRAFORM PLAN
-      # =====================================================
-
-      - name: 📋 Terraform Plan
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform plan \
-            -var-file="terraform.tfvars" \
-            -out=tfplan
-
-
-      # =====================================================
-      # 9. UPLOAD TERRAFORM PLAN
-      # =====================================================
-
-      - name: 📤 Upload Terraform Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan
-          path: ${{ env.TF_ROOT }}/tfplan
-          retention-days: 1
-
-
-  # =========================================================
-  # MAIN BRANCH
-  # APPLY
-  #
-  # ONLY MAIN CAN APPLY
-  # =========================================================
-
-  main-apply:
-
-    name: 🚀 Main - Terraform Apply
-
-    needs: main-plan
-
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
-
-    runs-on: ubuntu-latest
-
-    # =======================================================
-    # PRODUCTION ENVIRONMENT
-    #
-    # Configure approval in:
-    # Settings → Environments → production
-    # =======================================================
-
-    environment:
-      name: production
-
-    steps:
-
-      # =====================================================
-      # 1. CHECKOUT
-      # =====================================================
-
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-
-      # =====================================================
-      # 2. AZURE LOGIN
-      # =====================================================
-
-      - name: 🔐 Azure Login
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-
-      # =====================================================
-      # 3. VERIFY AZURE LOGIN
-      # =====================================================
-
-      - name: 🔎 Check Azure Login
-        run: |
-          az account show
-
-
-      # =====================================================
-      # 4. SETUP TERRAFORM
-      # =====================================================
-
-      - name: 🏗️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-
-      # =====================================================
-      # 5. TERRAFORM INIT
-      # =====================================================
-
-      - name: 📦 Terraform Init
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform init
-
-
-      # =====================================================
-      # 6. DOWNLOAD PLAN
-      # =====================================================
-
-      - name: 📥 Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-plan
-          path: ${{ env.TF_ROOT }}
-
-
-      # =====================================================
-      # 7. TERRAFORM APPLY
-      # =====================================================
-
-      - name: 🚀 Terraform Apply
-        working-directory: ${{ env.TF_ROOT }}
-        run: |
-          terraform apply \
-            -auto-approve \
-            tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan

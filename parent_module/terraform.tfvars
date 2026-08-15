@@ -3,7 +3,7 @@ resource_groups = {
     name     = "dilip-rg"
     location = "East US"
   }
-    "rg2" = {
+  "rg2" = {
     name     = "vikas-rg"
     location = "East US"
   }
