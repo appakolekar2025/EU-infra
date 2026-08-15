@@ -5,6 +5,7 @@ module "rgs" {
 }
 
 module "vnet" {
+  depends_on = [module.rgs]
   source = "../child_module/azurerm_virtual_network"
   vnet   = var.virtual_network
 }
