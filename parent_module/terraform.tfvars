@@ -48,9 +48,9 @@ subnet = {
 
 network_security_group = {
   nsg1 = {
-    name                = "aug-nsg"
-    resource_group_name = "appa-rg"
-    location            = "East US"
+    name                 = "aug-nsg"
+    resource_group_name  = "appa-rg"
+    location             = "East US"
     subnet_name          = "frontend-subnet"
     virtual_network_name = "aug-vnet"
   }
