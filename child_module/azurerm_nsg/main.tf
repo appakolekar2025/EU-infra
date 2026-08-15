@@ -1,3 +1,12 @@
+data "azurerm_subnet" "snet" {
+  for_each = var.nsg
+  name                 = each.value.subnet_name
+  resource_group_name  = each.value.resource_group_name
+  virtual_network_name = each.value.virtual_network_name
+  
+}
+
+
 resource "azurerm_network_security_group" "nsg" {
   for_each = var.nsg
   name                = each.value.name
@@ -23,7 +32,7 @@ resource "azurerm_network_security_rule" "aalow-rdp" {
 
 resource "azurerm_subnet_network_security_group_association" "nshasscoia" {
     for_each = var.nsg
-    subnet_id                 = each.value.subnet_id
+    subnet_id                 = data.azurerm_subnet.snet[each.key].id
     network_security_group_id = azurerm_network_security_group.nsg[each.key].id
   
 }
