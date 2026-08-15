@@ -4,11 +4,11 @@ module "rgs" {
 
 }
 
-module "vnet" {
-  depends_on = [module.rgs]
-  source     = "../child_module/azurerm_virtual_network"
-  vnet       = var.virtual_network
-}
+# module "vnet" {
+#   depends_on = [module.rgs]
+#   source     = "../child_module/azurerm_virtual_network"
+#   vnet       = var.virtual_network
+# }
 
 # module "snet" {
 #   source = "../child_module/azurerm_subnet"
