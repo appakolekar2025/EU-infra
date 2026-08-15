@@ -1,20 +1,11 @@
 resource_groups = {
-  "rg1" = {
+  rg1 = {
     name     = "dilip-rg"
     location = "East US"
   }
-  "rg2" = {
+  rg2 = {
     name     = "vikas-rg"
     location = "East US"
-  }
-}
-
-virtual_network = {
-  "vnet1" = {
-    name                = "aug-vnet"
-    resource_group_name = "dilip-rg"
-    location            = "East US"
-    address_space       = ["10.0.0.0/16"]
   }
 }
 
