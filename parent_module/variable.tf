@@ -2,24 +2,24 @@ variable "resource_groups" {
 
 }
 
-# variable "virtual_network" {
+variable "virtual_network" {
 
-# }
-# variable "subnet" {
+}
+variable "subnet" {
 
-# }
-# variable "network_security_group" {
+}
+variable "network_security_group" {
 
-# }
-# variable "network_interface" {
+}
+variable "network_interface" {
 
-# }
-# variable "bastion" {
+}
+variable "bastion" {
 
-# }
-# variable "virtual_machine" {
+}
+variable "virtual_machine" {
 
-# }
-# variable "key_vault" {
+}
+variable "key_vault" {
 
-# }
+}
