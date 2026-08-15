@@ -39,13 +39,7 @@ subnet = {
     virtual_network_name = "aug-vnet"
     address_prefixes     = ["10.0.4.0/24"]
   }
-  rg3 = {
-    name     = "Gaurav-rg"
-    location = "East US"
-  }
-
 }
-
 network_security_group = {
   nsg1 = {
     name                 = "aug-nsg"
