@@ -3,6 +3,11 @@ resource_groups = {
     name     = "appa-rg"
     location = "East US"
   }
+    rg2 = {
+    name     = "aaru-rg"
+    location = "East US"
+  }
+
 
 
 }
