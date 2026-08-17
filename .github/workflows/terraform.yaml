@@ -1,6 +1,7 @@
 name: Terraform
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "**"
@@ -15,7 +16,7 @@ permissions:
 jobs:
   terraform-plan:
     name: Terraform Plan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     defaults:
       run:
@@ -58,7 +59,7 @@ jobs:
 
   terraform-apply:
     name: Terraform Apply
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs: terraform-plan
 
